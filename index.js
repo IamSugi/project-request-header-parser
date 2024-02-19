@@ -30,13 +30,18 @@ app.get("/api/whoami", function (req, res) {
   const clientIp = forwardedIps[0] || req.socket.remoteAddress;
 
   const prefferedLanguages = req.get("Accept-Language");
-  const languages = prefferedLanguages.split(",");
-  const prefferedLanguage = languages[0].split(";")[0];
+  const prefferedLanguage = prefferedLanguages
+    .split(";")
+    .map((language) => {
+      const [code, q] = language.trim().split(";q=");
+      return q ? `${code};q=${q}` : code;
+    })
+    .join(";");
 
   const userAgent = req.get("User-Agent");
   res.json({
     ipaddress: clientIp,
-    languages: prefferedLanguage,
+    language: prefferedLanguage,
     software: userAgent,
   });
 });
